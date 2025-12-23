@@ -1,24 +1,63 @@
 # Current Sprint Plan
 
 ## Sprint Goal
-Phase 2: MCP Server Implementation
+Phase 3: RAG System Implementation
 
 ## Active Issues
 
-### Issue #8: MCP Integration Testing
-**Branch:** feature/ISSUE-8-mcp-testing
-**Status:** In Progress
+### Issue #9: RAG Pipeline - Document Chunking
+**Branch:** feature/ISSUE-9-rag-chunking
+**Status:** Not Started
 
 #### Implementation Plan
-- [ ] Create test fixtures for MCP server testing
-- [ ] Write integration tests for Inventory server
-- [ ] Write integration tests for Order server
-- [ ] Write integration tests for Shipping server
-- [ ] Test error handling and edge cases
+- [ ] Create src/rag/chunker.py with chunking strategies
+- [ ] Implement section-based chunking for manuals (500 tokens)
+- [ ] Implement clause-based chunking for policies (300 tokens)
+- [ ] Implement Q&A pair chunking for FAQs (200 tokens)
+- [ ] Add metadata extraction (source, section, product_id)
 
 ---
 
-## Previously Completed (Phase 1)
+### Issue #10: RAG Pipeline - Gemini Embeddings
+**Branch:** feature/ISSUE-10-embeddings
+**Status:** Not Started
+
+#### Implementation Plan
+- [ ] Create src/rag/embedder.py for embedding generation
+- [ ] Integrate Google Gemini gemini-embedding-001 model
+- [ ] Implement task_type switching (RETRIEVAL_DOCUMENT vs RETRIEVAL_QUERY)
+- [ ] Add rate limiting and retry logic
+- [ ] Handle batch embedding for efficiency
+
+---
+
+### Issue #11: Qdrant Vector Store Integration
+**Branch:** feature/ISSUE-11-qdrant
+**Status:** Not Started
+
+#### Implementation Plan
+- [ ] Create src/rag/vector_store.py for Qdrant operations
+- [ ] Implement collection management (create, delete)
+- [ ] Implement document upsert with metadata
+- [ ] Implement similarity search with filters
+- [ ] Add connection pooling and error handling
+
+---
+
+### Issue #12: Knowledge MCP Server
+**Branch:** feature/ISSUE-12-knowledge-server
+**Status:** Not Started
+
+#### Implementation Plan
+- [ ] Create src/mcp_servers/knowledge_server.py
+- [ ] Implement search_knowledge tool
+- [ ] Implement get_product_manual tool
+- [ ] Implement get_policy tool
+- [ ] Add resources: knowledge://manuals, knowledge://policies
+
+---
+
+## Previously Completed (Phase 1 & 2)
 
 ### Issue #1: Project Setup and Configuration
 **Branch:** feature/ISSUE-1-project-setup
@@ -110,9 +149,10 @@ Phase 2: MCP Server Implementation
 - [x] Issue #5: Inventory MCP Server
 - [x] Issue #6: Order MCP Server
 - [x] Issue #7: Shipping MCP Server
+- [x] Issue #8: MCP Integration Testing (104 tests, 94% coverage)
 
 **Phase 1: Foundation - COMPLETE**
-**Phase 2: MCP Servers - IN PROGRESS (Issue #8 remaining)**
+**Phase 2: MCP Servers - COMPLETE**
 
 ## Blockers
 - None
