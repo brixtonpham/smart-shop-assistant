@@ -31,14 +31,14 @@ Phase 1: Foundation - Project setup, database schema, configuration
 
 ### Issue #2: Database Schema Design
 **Branch:** feature/ISSUE-2-database-schema
-**Status:** Not Started
+**Status:** Complete
 
 #### Implementation Plan
-- [ ] Create SQLAlchemy models in src/database/models.py
-- [ ] Implement connection management in src/database/connection.py
-- [ ] Create migration script in scripts/setup_db.py
-- [ ] Add sample data seeding in scripts/seed_data.py
-- [ ] Document schema in docs/architecture.md
+- [x] Create SQLAlchemy models in src/database/models.py
+- [x] Implement connection management in src/database/connection.py
+- [x] Create migration script in scripts/setup_db.py
+- [x] Add sample data seeding in scripts/seed_data.py
+- [x] Document schema in docs/architecture.md
 
 #### Notes
 - Use async SQLAlchemy with aiosqlite
@@ -55,9 +55,12 @@ Phase 1: Foundation - Project setup, database schema, configuration
 
 ## Completed This Sprint
 - [x] Issue #1: Project Setup and Configuration
+- [x] Issue #2: Database Schema Design
 
 ## Blockers
 - None
 
 ## Learnings
 - Hatchling build requires `[tool.hatch.build.targets.wheel] packages = ["src"]` when using src/ layout
+- Async SQLAlchemy with aiosqlite requires `greenlet` dependency
+- Use `Mapped[T]` syntax for type-safe column definitions
