@@ -13,15 +13,25 @@ from sqlalchemy import select
 from src.database.connection import get_db_session
 from src.database.models import Product, Reservation
 from src.mcp_servers.inventory_server import (
-    check_stock,
-    get_all_products,
-    get_categories,
-    get_product_by_id,
-    list_products,
-    low_stock_report,
-    release_stock,
-    reserve_stock,
+    check_stock as _check_stock_tool,
+    get_all_products as _get_all_products_tool,
+    get_categories as _get_categories_tool,
+    get_product_by_id as _get_product_by_id_tool,
+    list_products as _list_products_tool,
+    low_stock_report as _low_stock_report_tool,
+    release_stock as _release_stock_tool,
+    reserve_stock as _reserve_stock_tool,
 )
+
+# Extract underlying functions from FastMCP tools
+check_stock = _check_stock_tool.fn
+get_all_products = _get_all_products_tool.fn
+get_categories = _get_categories_tool.fn
+get_product_by_id = _get_product_by_id_tool.fn
+list_products = _list_products_tool.fn
+low_stock_report = _low_stock_report_tool.fn
+release_stock = _release_stock_tool.fn
+reserve_stock = _reserve_stock_tool.fn
 
 
 @pytest.fixture
@@ -153,6 +163,7 @@ class TestReserveStock:
 
     async def test_reserve_stock_success(self, test_product):
         """Test successful stock reservation."""
+        now_utc = datetime.now(UTC)
         result = await reserve_stock(
             product_id=str(test_product.id),
             quantity=10,
@@ -161,7 +172,13 @@ class TestReserveStock:
 
         assert result.product_id == test_product.id
         assert result.quantity == 10
-        assert result.expires_at > datetime.now(UTC)
+        # Pydantic converts to naive datetime, so compare with timezone-aware datetime properly
+        # The expires_at should be approximately 15 minutes from now
+        if result.expires_at.tzinfo is None:
+            # If naive, make now naive too for comparison
+            assert result.expires_at > now_utc.replace(tzinfo=None)
+        else:
+            assert result.expires_at > now_utc
 
         # Verify reservation in database
         async with get_db_session() as session:

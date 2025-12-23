@@ -582,7 +582,8 @@ async def get_order_resource(order_id: str) -> str:
     """
     logger.info(f"Fetching order resource: {order_id}")
 
-    order = await get_order(order_id)  # type: ignore[operator]
+    # Call the get_order function's underlying implementation
+    order = await get_order.fn(order_id)  # type: ignore[attr-defined]
     return str(order.model_dump())
 
 
