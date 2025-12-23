@@ -203,3 +203,164 @@ class TestGetCarriers:
         assert "FedEx" in carriers
         assert "USPS" in carriers
         assert "DHL" in carriers
+
+
+class TestEdgeCases:
+    """Test edge cases and error scenarios."""
+
+    def test_estimate_delivery_empty_address(self) -> None:
+        """Test estimate_delivery with empty address."""
+        # Should still work as address is just stored, not validated
+        result = estimate_delivery(address="", method="standard")
+        assert result.method == "standard"
+
+    def test_get_shipping_options_zero_weight(self) -> None:
+        """Test shipping options with zero weight."""
+        # Should still work, no weight surcharge
+        options = get_shipping_options(weight=0.0, destination="90210")
+        assert len(options) == 3
+
+    def test_get_shipping_options_exactly_50_lbs(self) -> None:
+        """Test shipping options at weight threshold."""
+        options = get_shipping_options(weight=50.0, destination="90210")
+        # At exactly 50, no surcharge
+        assert any(option.cost == Decimal("5.99") for option in options)
+
+    def test_get_shipping_options_just_over_threshold(self) -> None:
+        """Test shipping options just over weight threshold."""
+        options = get_shipping_options(weight=50.1, destination="90210")
+        # Over 50, surcharge applied
+        assert all(option.cost >= Decimal("15.99") for option in options)
+
+    def test_create_shipment_generates_unique_tracking(self) -> None:
+        """Test that each shipment gets unique tracking number."""
+        order_id = str(uuid4())
+        shipment1 = create_shipment(order_id=order_id, method="standard")
+
+        order_id2 = str(uuid4())
+        shipment2 = create_shipment(order_id=order_id2, method="standard")
+
+        assert shipment1.tracking_number != shipment2.tracking_number
+        assert shipment1.id != shipment2.id
+
+    def test_track_package_multiple_events(self) -> None:
+        """Test tracking package returns history with multiple events."""
+        # Create shipment first
+        order_id = str(uuid4())
+        shipment = create_shipment(order_id=order_id, method="express")
+
+        # Track it
+        tracking = track_package(tracking_number=shipment.tracking_number)
+
+        assert len(tracking.history) >= 1
+        assert all(isinstance(event.timestamp, datetime) for event in tracking.history)
+
+    def test_estimate_delivery_dates_are_future(self) -> None:
+        """Test that estimated delivery dates are in the future."""
+        now = datetime.now()
+
+        standard = estimate_delivery(address="123 Main St", method="standard")
+        express = estimate_delivery(address="123 Main St", method="express")
+        overnight = estimate_delivery(address="123 Main St", method="overnight")
+
+        assert standard.estimated_date > now
+        assert express.estimated_date > now
+        assert overnight.estimated_date > now
+
+    def test_estimate_delivery_ordering(self) -> None:
+        """Test that faster methods have earlier delivery dates."""
+        standard = estimate_delivery(address="123 Main St", method="standard")
+        express = estimate_delivery(address="123 Main St", method="express")
+        overnight = estimate_delivery(address="123 Main St", method="overnight")
+
+        # Overnight should arrive before express, express before standard
+        assert overnight.estimated_date < express.estimated_date
+        assert express.estimated_date < standard.estimated_date
+
+    def test_carrier_assignment_by_method(self) -> None:
+        """Test that carriers are assigned based on shipping method."""
+        order_id = str(uuid4())
+
+        standard = create_shipment(order_id=order_id, method="standard")
+        assert standard.carrier == "USPS"
+
+        order_id2 = str(uuid4())
+        express = create_shipment(order_id=order_id2, method="express")
+        assert express.carrier == "FedEx"
+
+        order_id3 = str(uuid4())
+        overnight = create_shipment(order_id=order_id3, method="overnight")
+        assert overnight.carrier == "UPS"
+
+
+class TestShippingCostCalculation:
+    """Test shipping cost calculations."""
+
+    def test_standard_base_cost(self) -> None:
+        """Test standard shipping base cost."""
+        result = estimate_delivery(address="123 Main St", method="standard")
+        assert result.cost == Decimal("5.99")
+
+    def test_express_base_cost(self) -> None:
+        """Test express shipping base cost."""
+        result = estimate_delivery(address="123 Main St", method="express")
+        assert result.cost == Decimal("14.99")
+
+    def test_overnight_base_cost(self) -> None:
+        """Test overnight shipping base cost."""
+        result = estimate_delivery(address="123 Main St", method="overnight")
+        assert result.cost == Decimal("34.99")
+
+    def test_heavy_package_standard(self) -> None:
+        """Test heavy package cost for standard shipping."""
+        options = get_shipping_options(weight=60.0, destination="90210")
+        standard = next(opt for opt in options if opt.method == "Standard")
+        assert standard.cost == Decimal("15.99")  # 5.99 + 10.00 surcharge
+
+    def test_heavy_package_express(self) -> None:
+        """Test heavy package cost for express shipping."""
+        options = get_shipping_options(weight=60.0, destination="90210")
+        express = next(opt for opt in options if opt.method == "Express")
+        assert express.cost == Decimal("24.99")  # 14.99 + 10.00 surcharge
+
+    def test_heavy_package_overnight(self) -> None:
+        """Test heavy package cost for overnight shipping."""
+        options = get_shipping_options(weight=60.0, destination="90210")
+        overnight = next(opt for opt in options if opt.method == "Overnight")
+        assert overnight.cost == Decimal("44.99")  # 34.99 + 10.00 surcharge
+
+
+class TestTrackingStatus:
+    """Test tracking status functionality."""
+
+    def test_tracking_status_structure(self) -> None:
+        """Test tracking status has correct structure."""
+        tracking = track_package(tracking_number="1ZTEST123456789")
+
+        assert tracking.tracking_number == "1ZTEST123456789"
+        assert tracking.status in ["picked_up", "in_transit", "out_for_delivery", "delivered", "pending"]
+        assert isinstance(tracking.updated_at, datetime)
+        assert isinstance(tracking.history, list)
+        assert len(tracking.history) > 0
+
+    def test_tracking_event_structure(self) -> None:
+        """Test tracking events have correct structure."""
+        tracking = track_package(tracking_number="1ZTEST123456789")
+
+        for event in tracking.history:
+            assert isinstance(event.timestamp, datetime)
+            assert isinstance(event.status, str)
+            assert isinstance(event.description, str)
+            # location can be None or str
+            assert event.location is None or isinstance(event.location, str)
+
+    def test_created_shipment_tracking_status(self) -> None:
+        """Test tracking status for newly created shipment."""
+        order_id = str(uuid4())
+        shipment = create_shipment(order_id=order_id, method="standard")
+
+        tracking = track_package(tracking_number=shipment.tracking_number)
+
+        assert tracking.status == "pending"
+        assert len(tracking.history) == 1
+        assert tracking.history[0].status == "pending"
