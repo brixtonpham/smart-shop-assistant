@@ -53,9 +53,27 @@ Phase 1: Foundation - Project setup, database schema, configuration
 
 ---
 
+### Issue #3: Pydantic Schemas
+**Branch:** feature/ISSUE-3-pydantic-schemas
+**Status:** Complete
+
+#### Implementation Plan
+- [x] Create src/schemas/products.py
+- [x] Create src/schemas/orders.py
+- [x] Create src/schemas/shipping.py
+- [x] Create src/schemas/common.py
+
+#### Notes
+- 22 schemas implemented with Pydantic v2 syntax
+- Validators for price, quantity, stock fields
+- Field examples for OpenAPI documentation
+
+---
+
 ## Completed This Sprint
 - [x] Issue #1: Project Setup and Configuration
 - [x] Issue #2: Database Schema Design
+- [x] Issue #3: Pydantic Schemas
 
 ## Blockers
 - None
@@ -64,3 +82,4 @@ Phase 1: Foundation - Project setup, database schema, configuration
 - Hatchling build requires `[tool.hatch.build.targets.wheel] packages = ["src"]` when using src/ layout
 - Async SQLAlchemy with aiosqlite requires `greenlet` dependency
 - Use `Mapped[T]` syntax for type-safe column definitions
+- Pydantic v2 uses `model_config` dict instead of `class Config`
