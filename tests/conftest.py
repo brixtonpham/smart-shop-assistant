@@ -36,7 +36,5 @@ def sample_order():
         "customer_id": "cust-001",
         "status": "pending",
         "total": 99.99,
-        "items": [
-            {"product_id": "prod-001", "quantity": 1, "price_each": 99.99}
-        ],
+        "items": [{"product_id": "prod-001", "quantity": 1, "price_each": 99.99}],
     }
