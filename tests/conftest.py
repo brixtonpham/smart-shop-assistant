@@ -1,6 +1,29 @@
 """Pytest configuration and shared fixtures."""
 
+import asyncio
+
 import pytest
+import pytest_asyncio
+
+from src.database.connection import create_tables, drop_tables
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Create event loop for async tests."""
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest_asyncio.fixture(scope="function", autouse=True)
+async def setup_database():
+    """Setup test database before each test and clean up after."""
+    # Create tables before test
+    await create_tables()
+    yield
+    # Drop tables after test to ensure clean state
+    await drop_tables()
 
 
 @pytest.fixture
