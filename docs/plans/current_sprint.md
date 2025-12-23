@@ -70,10 +70,30 @@ Phase 1: Foundation - Project setup, database schema, configuration
 
 ---
 
+### Issue #4: Configuration Management
+**Branch:** feature/ISSUE-4-configuration
+**Status:** Complete
+
+#### Implementation Plan
+- [x] Create src/config.py with Settings class
+- [x] Support .env file loading
+- [x] Add Qdrant, Gemini, MCP, RAG settings
+- [x] Document all config options in .env.example
+
+#### Notes
+- Using Pydantic v2 SettingsConfigDict
+- Cached settings via @lru_cache
+- Validators for log_level, chunk_overlap
+
+---
+
 ## Completed This Sprint
 - [x] Issue #1: Project Setup and Configuration
 - [x] Issue #2: Database Schema Design
 - [x] Issue #3: Pydantic Schemas
+- [x] Issue #4: Configuration Management
+
+**Phase 1: Foundation - COMPLETE**
 
 ## Blockers
 - None
@@ -83,3 +103,4 @@ Phase 1: Foundation - Project setup, database schema, configuration
 - Async SQLAlchemy with aiosqlite requires `greenlet` dependency
 - Use `Mapped[T]` syntax for type-safe column definitions
 - Pydantic v2 uses `model_config` dict instead of `class Config`
+- Use SettingsConfigDict for pydantic-settings v2
