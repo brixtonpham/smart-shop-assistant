@@ -1,9 +1,24 @@
 # Current Sprint Plan
 
 ## Sprint Goal
-Phase 1: Foundation - Project setup, database schema, configuration
+Phase 2: MCP Server Implementation
 
 ## Active Issues
+
+### Issue #8: MCP Integration Testing
+**Branch:** feature/ISSUE-8-mcp-testing
+**Status:** In Progress
+
+#### Implementation Plan
+- [ ] Create test fixtures for MCP server testing
+- [ ] Write integration tests for Inventory server
+- [ ] Write integration tests for Order server
+- [ ] Write integration tests for Shipping server
+- [ ] Test error handling and edge cases
+
+---
+
+## Previously Completed (Phase 1)
 
 ### Issue #1: Project Setup and Configuration
 **Branch:** feature/ISSUE-1-project-setup
@@ -92,8 +107,12 @@ Phase 1: Foundation - Project setup, database schema, configuration
 - [x] Issue #2: Database Schema Design
 - [x] Issue #3: Pydantic Schemas
 - [x] Issue #4: Configuration Management
+- [x] Issue #5: Inventory MCP Server
+- [x] Issue #6: Order MCP Server
+- [x] Issue #7: Shipping MCP Server
 
 **Phase 1: Foundation - COMPLETE**
+**Phase 2: MCP Servers - IN PROGRESS (Issue #8 remaining)**
 
 ## Blockers
 - None
